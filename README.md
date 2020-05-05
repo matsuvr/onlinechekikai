@@ -44,6 +44,8 @@ canvas領域にマウスやペンタブレットで直接、サインの書き�
 
 OBSのoutput.htmlを読み込んだブラウザソースを表示して、ファンに見える状態にします。ファンはこのQRコードから、サインを持ち帰ることができます。
 
+![howtouse04](readmepics/howtouse04.png)
+
 紹介動画を作ったので、合わせてご覧下さい。
 
 https://youtu.be/vmbB8DfOUew
