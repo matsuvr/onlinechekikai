@@ -9,11 +9,39 @@ temppic、signedpic、output.htmlのフォルダ/ファイルは書き込み可�
 
 Just put files and folders into your web server which has PHP.
 "temppic", "signedpic" folders and "output.html" file must have writeable permissions.
-
 After upload, access to "index.html" on modern browser.
 
 # 使い方 How to use
 
+サインをするタレントは、OBS Virtual camを使って、SkypeやZoomなどのビデオ通話アプリに自分の姿を映している状況を想定しています。
+OBSで構成するシーン上に、事前に、https://あなたがインストールしたサーバー/onlinechekikai/output.html をブラウザソースとして読み込んでおいてください。
+そして、このブラウザソースは、普段は非表示にしておきます。
+
+![howtouse00](readmepics/howtouse00.png)
+
 ビデオ通話アプリの画面キャプチャーを、OSのクリップボードにコピーします。Windowsの場合はWinキー＋Shift＋Sで、ドラッグした領域をクリップボードにコピーできます。
+そして、「ここをクリックして、Ctrl＋Vまたは右クリックから貼り付けで画像を貼ってください」という領域をクリックして `Ctrl+V` または `右クリック→貼り付け` でペースとします。 
 
+![howtouse01](readmepics/howtouse01.png)
 
+すると、canvas領域に、自動的にリサイズされた状態で貼り付けられます。画像の大きさなどによっては、多少時間がかかることがあります。
+
+![howtouse02](readmepics/howtouse02.png)
+
+canvas領域にマウスやペンタブレットで直接、サインの書き込みができます。
+色の変更や、閉じた領域を塗りつぶす塗りつぶしツールもあります。
+
+![howtouse03](readmepics/howtouse03.png)
+
+書き終わったら、`完成` ボタンを押します。
+
+すると、output.htmlには、完成した画像のサムネイルと、完成した画像をダウンロードできるQRコードが表示されています。
+※output.htmlは標準では1分ごとに自動更新する設定になっているので、すぐには反映されないことがあります。output.htmlのmetaタグ内の数字を変更することで自動更新の間隔を変更できます。
+
+OBSのoutput.htmlを読み込んだブラウザソースを表示して、ファンに見える状態にします。ファンはこのQRコードから、サインを持ち帰ることができます。
+
+紹介動画を作ったので、合わせてご覧下さい。
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vmbB8DfOUew" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+プログラムを始めたばかりの初心者が作ったので、フォークしてどんどん自分好みに改変していただけると嬉しいです。
