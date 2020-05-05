@@ -12,5 +12,8 @@ Just put files and folders into your web server which has PHP.
 
 After upload, access to "index.html" on modern browser.
 
-# 使い方
+# 使い方 How to use
+
+ビデオ通話アプリの画面キャプチャーを、OSのクリップボードにコピーします。Windowsの場合はWinキー＋Shift＋Sで、ドラッグした領域をクリップボードにコピーできます。
+
 
