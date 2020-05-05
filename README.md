@@ -42,6 +42,6 @@ OBSのoutput.htmlを読み込んだブラウザソースを表示して、ファ
 
 紹介動画を作ったので、合わせてご覧下さい。
 
-[<iframe width="560" height="315" src="https://www.youtube.com/embed/vmbB8DfOUew" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>](https://youtu.be/vmbB8DfOUew)
+https://youtu.be/vmbB8DfOUew(https://youtu.be/vmbB8DfOUew)
 
 プログラムを始めたばかりの初心者が作ったので、フォークしてどんどん自分好みに改変していただけると嬉しいです。
