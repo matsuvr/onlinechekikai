@@ -1,6 +1,10 @@
 # onlinechekikai
 オンラインのサイン会・チェキ会を効率化するためのWebアプリ Support tool for autograph session running in browser
 
+*現状、セキュリティが激甘です。使う時だけサーバーを立てて、サイン会が終わったらサーバーごとオフにする運用を推奨しています*
+
+*Currently, its security is very weak. I recommend setting up the server only when you use it and turning it off after the autograph session is over.*
+
 # インストール方法 How to install
 
 PHPが動くWebサーバーに、このフォルダ構造を保ったままアップロードします。
