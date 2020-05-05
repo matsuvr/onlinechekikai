@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+ <meta http-equiv="Refresh" content="60">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style type="text/css"> canvas { border: 9px solid #ffffff;} </style>
+ <br>
+   <title>output</title>
+ </head>
+ <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script> 
+ <body>
+  <img src="signedpic/signed20205515211588659687176.png" width="200" height="200">
+ <div id="img-qr"></div> 
+ <br>
+ <input type="button" value="更新する" onclick="window.location.reload();" />
+ <script>
+  $(function () {
+     var qrtext = "http://localhost/paste/signedpic/signed20205515211588659687176.png";
+     var utf8qrtext = unescape(encodeURIComponent(qrtext));
+     $("#img-qr").html("");
+     $("#img-qr").qrcode({
+       text: utf8qrtext
+     });
+   });
+ </script>
+ </body>
+ </html>

@@ -1,0 +1,344 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+  <title>オンラインチェキ会システム</title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.0/normalize.min.css" media="screen" rel="stylesheet"
+    type="text/css" />
+</head>
+<style type="text/css">
+  body>div {
+    width: 80%;
+    padding: .5em;
+    margin: 0.5em auto;
+  }
+
+  .demo,
+  .result {
+    border: solid 1px #999;
+    padding: 0.5em;
+    margin: 1em 0 0 0;
+    box-sizing: contentbox;
+    width: 100%;
+  }
+
+  .result>img {
+    border: solid 1px #ccc;
+  }
+
+  .pastable {
+    transition: box-shadow ease .3s;
+  }
+
+  .pastable:hover {
+    box-shadow: 0 0 3px black;
+  }
+
+  .pastable.pastable-focus {
+    box-shadow: 0 0 10px black;
+  }
+
+  #canvas-container {
+    display: block;
+    border: 5px solid black;
+    margin-bottom: 20px;
+    width: 800px;
+  }
+
+  canvas {
+    display: block;
+  }
+
+  button {
+    border: 1px solid black;
+    background-color: #ededed;
+    padding: 5px;
+  }
+
+  button.active {
+    background-color: #888;
+  }
+
+  .color {
+    color: white;
+  }
+
+  #red {
+    background-color: red;
+  }
+
+  #green {
+    background-color: green;
+  }
+
+  #blue {
+    background-color: blue;
+  }
+
+  #black {
+    background-color: black;
+  }
+</style>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="lib/paste.js"></script>
+
+<body>
+  <div>
+    <h1>オンラインチェキ会システム</h1>
+    <div class="demo demo-noninputable">ここをクリックして、Ctrl＋Vまたは右クリックから貼り付けで画像を貼ってください</div>
+  </div>
+
+  <div>
+    <p>Canvas:</p>
+    <div id="canvas-container"><canvas id="cfd"></canvas></div>
+    <button id="save">完成</button>
+    <button id="restore">やり直し</button>
+    <button id="bucket">塗りつぶし</button>
+    <button id="disable">Disable</button>
+    <button id="enable">Enable</button>
+    <button id="undo">一手順戻る</button>
+    <button id="redo">一手順戻るを取り消す</button> <input id="tolerance" type="text" />     <button id="clear">全消去</button>
+    <br />
+    <br />
+    <button id="red" class="color">Red</button>
+    <button id="green" class="color">Green</button>
+    <button id="blue" class="color">Blue</button>
+    <button id="black" class="color">Black</button>
+    <button id="darkgrey" class="color">darkgrey</button>
+    <button id="grey" class="color">grey</button>
+    <button id="lightgrey" class="color">lightgrey</button> <br />
+    <br />
+    <!-- <p id="redraw-count">0</p> -->
+    <p>OBSのブラウザソースとして読み込む<a href="output.html" target="_blank">output.htmlはこちら</a></p>
+
+  </div>
+  <div id="signed-qr"></div>
+
+  <div>
+    <p>
+    以下のOSSによって制作しています。<br>
+    [<a href="https://github.com/layerssss/paste.js/" target="_blank">paste.js</a>] MIT License (MIT)    Copyright (c) 2015 Michael Yin<br>
+    [<a href="https://github.com/federico-moretti/canvas-free-drawing" target="_blank">canvas-free-drawing</a>] MIT License (MIT)    Copyright (c) 2018-present, Federico Moretti<br>
+    [<a href="https://github.com/oliver-moran/jimp" target="_blank">jimp</a>] MIT License    Copyright (c) 2018 Oliver Moran<br>
+    </p>
+  </div>
+</body>
+<script src="lib/canvas-free-drawing.min.js"></script>
+<script>
+  //グローバル的に使う変数定義
+    var clipboarddata = '';
+    var canvasWidth = 800;
+    var canvasHeight = 800;
+
+  //Ctrl+Vで貼り付けられたものをblobに取り込む  
+    $(function () {
+    $('.demo-noninputable').pastableNonInputable();
+    $('.demo-textarea').on('focus', function () {
+      var isFocused = $(this).hasClass('pastable-focus');
+      console && console.log('[textarea] focus event fired! ' + (isFocused ? 'fake onfocus' : 'real onfocus'));
+    }).pastableTextarea().on('blur', function () {
+      var isFocused = $(this).hasClass('pastable-focus');
+      console && console.log('[textarea] blur event fired! ' + (isFocused ? 'fake onblur' : 'real onblur'));
+    });
+    $('.demo-contenteditable').pastableContenteditable();
+    $('.demo').on('pasteImage', function (ev, data) {
+      var blobUrl = URL.createObjectURL(data.blob);
+      var name = data.name != null ? ', name: ' + data.name : '';
+      var imageblob = data.blob;
+
+
+
+    //貼り付けしたタイミングをベースにファイル名を付ける
+      var today = new Date();
+      var year = today.getFullYear();
+      var month = today.getMonth() + 1;
+      var day = today.getDate();
+      var hour = today.getHours();
+      var min = today.getMinutes();
+      var seconds = today.getTime();
+      var timebasedname = String(year) + String(month) + String(day) + String(hour) + String(min) + +String(
+        seconds) + '.png';
+      
+    //blobを画像としてPOSTし、temppicフォルダに保存する
+      var formData = new FormData();
+      formData.append('clipboardImage', imageblob);
+      formData.append('timebasedname', timebasedname);
+
+      $.ajax({
+        type: 'POST',
+        url: 'clipboardimage-accepter.php',
+        data: formData,
+        contentType: false,
+        processData: false,
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          console.log("error");
+        }
+      });
+
+    //temppicに保存した画像をリサイズしてcanvasに渡す
+      var imgurl = 'temppic/' + timebasedname;
+        var worker = new Worker("jimp-worker.js");
+        worker.onmessage = function (e) {
+             cfd.restore(e.data);
+              //あとでcanvasの「やり直し」に使う
+              clipboarddata = e.data;
+        };
+        worker.postMessage(imgurl);
+
+    //Ctrl+Vした画像の解像度を表示する
+      $('<div class="result">image: ' + data.width + ' x ' + data.height + name
+        // '<img src="' + data.dataURL + '" ><a href="' + blobUrl + '">' + blobUrl + '</div>' +
+        // '<div id="img-qr"></div>'
+        + '</div>').insertAfter(this);
+    }).on('pasteImageError', function (ev, data) {
+      alert('Oops: ' + data.message);
+      if (data.url) {
+        alert('But we got its url anyway:' + data.url)
+      }
+    }).on('pasteText', function (ev, data) {
+      $('<div class="result"></div>').text('text: "' + data.text + '"').insertAfter(this);
+    }).on('pasteTextRich', function (ev, data) {
+      $('<div class="result"></div>').text('rtf: "' + data.text + '"').insertAfter(this);
+    }).on('pasteTextHtml', function (ev, data) {
+      $('<div class="result"></div>').text('html: "' + data.text + '"').insertAfter(this);
+    });
+  });
+
+  //base64をBlobに変換する関数を定義
+  function base64ToBlob(base64, mime) {
+    mime = mime || '';
+    var sliceSize = 1024;
+    var byteChars = window.atob(base64);
+    var byteArrays = [];
+
+    for (var offset = 0, len = byteChars.length; offset < len; offset += sliceSize) {
+      var slice = byteChars.slice(offset, offset + sliceSize);
+
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      var byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, {
+      type: mime
+    });
+  }
+
+
+  //canvasに描く部分
+  const cfd = new CanvasFreeDrawing.default({
+    elementId: 'cfd',
+    width: 800,
+    height: 800,
+    showWarnings: true,
+  });
+  const redrawCount = document.getElementById('redraw-count');
+  cfd.on({
+    event: 'redraw',
+    counter: 0
+  }, () => {
+    redrawCount.innerText = parseInt(redrawCount.innerText) + 1;
+  });
+  const textarea = document.getElementById('backup');
+
+  //canvasを真っ白にする
+  document
+    .getElementById('clear')
+    .addEventListener('click', () => cfd.clear());
+  
+  //
+  document
+    .getElementById('disable')
+    .addEventListener('click', () => cfd.disableDrawingMode());
+  document
+    .getElementById('enable')
+    .addEventListener('click', () => cfd.enableDrawingMode());
+  document.getElementById('save').addEventListener('click', () => {
+    //サインが入った画像をblobに変換して、POSTしてサーバーにPNGとして保存する
+    var signedPicBase64 = cfd.save(); //data:image/png;base64,が頭に付いたbase64として出てくる
+    var base64ImageContent = signedPicBase64.replace(/^data:image\/(png|jpg);base64,/, "");
+    var signedblob = base64ToBlob(base64ImageContent, 'image/png'); //blobに変換
+      var postday = new Date();
+      var year = postday.getFullYear();
+      var month = postday.getMonth() + 1;
+      var day = postday.getDate();
+      var hour = postday.getHours();
+      var min = postday.getMinutes();
+      var seconds = postday.getTime();
+      var signedfilename = 'signed' + String(year) + String(month) + String(day) + String(hour) + String(min) + +String(
+        seconds) + '.png';　//ファイル名を時間から生成する
+    var fd = new FormData();　//blobをPOSTする
+    fd.append('signedPic', signedblob);
+    fd.append('signedFileName',  signedfilename);
+    $.ajax({
+        url: 'signedpicture-accepter.php',
+        type: "POST",
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: fd
+      })
+
+    //サーバーに保存されたサイン入り画像のアドレスをQRコードにする
+      $(function () {
+        var qrtext = location.host + '/signedpic/' + signedfilename;
+        var utf8qrtext = unescape(encodeURIComponent(qrtext));
+        $("#signed-qr").html("");
+        $("#signed-qr").qrcode({
+          text: utf8qrtext
+        });
+      });
+
+  });
+
+  //「サインのリセット」の定義
+  document.getElementById('restore').addEventListener('click', () => {
+    cfd.clear();
+    cfd.restore(clipboarddata);
+  });
+
+  //一つ戻る、一つ戻るをキャンセル、バケツツールなどは元のサンプルソースのまま
+  document.getElementById('undo').addEventListener('click', () => cfd.undo());
+  document.getElementById('redo').addEventListener('click', () => cfd.redo());
+  document.getElementById('bucket').addEventListener('click', () => {
+    cfd.configBucketTool({
+      tolerance: document.getElementById('tolerance').value,
+    });
+    const isActive = cfd.toggleBucketTool();
+    document.getElementById('bucket').classList.add('active');
+    if (isActive) {} else {
+      document.getElementById('bucket').classList.remove('active');
+    }
+  });
+  document
+    .getElementById('red')
+    .addEventListener('click', () => cfd.setDrawingColor([255, 0, 0]));
+  document
+    .getElementById('green')
+    .addEventListener('click', () => cfd.setDrawingColor([0, 255, 0]));
+  document
+    .getElementById('blue')
+    .addEventListener('click', () => cfd.setDrawingColor([0, 0, 255]));
+  document
+    .getElementById('black')
+    .addEventListener('click', () => cfd.setDrawingColor([0, 0, 0]));
+  document
+    .getElementById('darkgrey')
+    .addEventListener('click', () => cfd.setDrawingColor([50, 50, 50]));
+  document
+    .getElementById('grey')
+    .addEventListener('click', () => cfd.setDrawingColor([100, 100, 100]));
+  document
+    .getElementById('lightgrey')
+    .addEventListener('click', () => cfd.setDrawingColor([150, 150, 150]));
+</script>
+
+</html>
